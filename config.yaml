@@ -1,0 +1,18 @@
+#################################
+## 影响较大的配置
+# [*] chrome 的执行路径。
+# 如果选择自己的 chrome，需要保证后台无开启任何进程，否则 debug 会失败
+chromePath: chrome-win/chrome.exe
+# [*] max 或者 w,h 两种形式
+windowSize: 960,1080
+# [*] 是否每次都新开页面，否则将使用第一个页面进行跳转
+newPage: true
+# [*] 我的某一篇需要登录才能看到的语雀文章
+targetUrl: https://www.yuque.com/jayzou/myann8/uwsrkf
+#################################
+# 调试端口，0表示自动选择
+debugPort: 0
+# 保存调试端口的文件，方便共用同一个浏览器
+debugPortFile: debugPort.txt
+# 打开浏览器时的页面。默认为空白页。（最好是可以访问的页面，否则需要等待超时）
+#startupUrl: https://www.google.com
