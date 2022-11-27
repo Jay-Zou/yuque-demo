@@ -45,6 +45,7 @@ def start_chrome(config: Config) -> int:
         config.chromePath,
         config.startupUrl,
         '--test-type',
+        '--user-data-dir=data',
         '--remote-debugging-port=%d' % debug_port,
     ]
     if config.windowSize == 'max':
@@ -64,16 +65,33 @@ def create_or_conn(p: Playwright, config: Config) -> (Browser, bool):
             debug_port = _f.readline()
         if debug_port:
             try:
-                return p.chromium.connect_over_cdp('http://localhost:' + debug_port), False
+                debug_url = 'http://localhost:%s' % debug_port
+                print('Try to connect the browser: %s' % debug_url)
+                return p.chromium.connect_over_cdp(debug_url), False
             except Exception:
-                pass
+                print('Connect the browser failed')
     # 如果不存在、或者连接失败，则创建浏览器，再连接
     debug_port = start_chrome(config)
-    # 等待浏览器启动
-    time.sleep(1)
-    # 连接
-    browser = p.chromium.connect_over_cdp('http://localhost:%d' % debug_port)
-    # 记录端口
+    print('create a browser on debug_port: %d' % debug_port)
+    browser = None
+    ex = None
+    # 等待浏览器启动，尝试 30 次连接，每次间隔 1s
+    for i in range(0, 30):
+        time.sleep(1)
+        try:
+            debug_url = 'http://localhost:%d' % debug_port
+            print('[times=%d] Try to connect the browser: %s' % (i, debug_url))
+            browser = p.chromium.connect_over_cdp(debug_url)
+            if browser is not None:
+                break
+        except Exception as e:
+            ex = e
+    # 如果连接失败，则打印错误并退出
+    if browser is None:
+        print('[err] Cannot connect to the browser: \n%s' % ex)
+        sys.exit(1)
+    print('Connect succeed')
+    # 连接成功，记录端口
     with open(config.debugPortFile, mode='w+') as _f:
         _f.write(str(debug_port))
     return browser, True
