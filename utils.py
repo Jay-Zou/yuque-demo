@@ -45,9 +45,15 @@ def start_chrome(config: Config) -> int:
         config.chromePath,
         config.startupUrl,
         '--test-type',
-        '--user-data-dir=data',
         '--remote-debugging-port=%d' % debug_port,
     ]
+    inner_chrome_path = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+    # 如果使用内置浏览器，则不允许自定义 --user-data-dir
+    if not os.path.exists(inner_chrome_path) and os.path.abspath(inner_chrome_path) != os.path.abspath(
+            config.chromePath):
+        start_cmd.append('--user-data-dir=data')
+
+    # 窗口最大化，或者自定义大小
     if config.windowSize == 'max':
         start_cmd.append('--start-maximized')
     else:
